@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fluid Resuscitation Practice Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0c4a6e 0%, #075985 50%, #0369a1 100%);
+            min-height: 100vh;
+            padding: 30px;
+            color: #f0f9ff;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 50px 30px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 24px;
+            border: 2px solid rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-size: 3.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: -2px;
+        }
+        
+        .subtitle {
+            font-size: 1.3em;
+            color: #bfdbfe;
+            font-weight: 600;
+        }
+        
+        .progress-bar {
+            background: rgba(0,0,0,0.3);
+            height: 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #60a5fa, #3b82f6);
+            height: 100%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1em;
+            color: white;
+            position: relative;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .intro-screen, .question-screen, .completion-screen {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 50px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+            color: #1e293b;
+        }
+        
+        .intro-content h2 {
+            color: #0c4a6e;
+            font-size: 2.2em;
+            font-weight: 800;
+            margin-bottom: 30px;
+        }
+        
+        .key-points {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left: 6px solid #3b82f6;
+            padding: 30px;
+            border-radius: 16px;
+            margin: 30px 0;
+        }
+        
+        .key-points h3 {
+            color: #1e40af;
+            font-size: 1.5em;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        
+        .key-points ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .key-points li {
+            padding: 12px 0;
+            padding-left: 35px;
+            position: relative;
+            line-height: 1.7;
+            color: #1e3a8a;
+            font-weight: 500;
+        }
+        
+        .key-points li:before {
+            content: "💧";
+            position: absolute;
+            left: 0;
+            font-size: 1.3em;
+        }
+        
+        .formula-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 3px solid #3b82f6;
+            border-radius: 16px;
+            padding: 25px;
+            margin: 25px 0;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        
+        .formula-title {
+            color: #1e40af;
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .formula {
+            font-size: 1.3em;
+            color: #0c4a6e;
+            font-weight: 700;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 18px 40px;
+            font-size: 1.2em;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(148, 163, 184, 0.2);
+            color: #475569;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Outfit', sans-serif;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(148, 163, 184, 0.3);
+            border-color: #94a3b8;
+        }
+        
+        .question-card {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-left: 6px solid #3b82f6;
+            padding: 35px;
+            border-radius: 16px;
+            margin-bottom: 35px;
+        }
+        
+        .difficulty-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 24px;
+            font-size: 0.9em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .guided { background: #d1fae5; color: #065f46; }
+        .intermediate { background: #fef3c7; color: #92400e; }
+        .advanced { background: #fecaca; color: #991b1b; }
+        
+        .scenario-title {
+            color: #0c4a6e;
+            font-size: 1.8em;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        
+        .scenario-text {
+            color: #334155;
+            font-size: 1.15em;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+        
+        .patient-info {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #bfdbfe;
+        }
+        
+        .patient-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-label {
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .info-value {
+            color: #0c4a6e;
+            font-weight: 700;
+            font-size: 1.1em;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        
+        .guided-calculation {
+            background: rgba(34, 197, 94, 0.1);
+            border: 3px solid #22c55e;
+            border-radius: 16px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .guided-calculation h4 {
+            color: #166534;
+            font-size: 1.2em;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .calculation-step {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            border-left: 4px solid #22c55e;
+        }
+        
+        .calculation-step input {
+            background: #f0fdf4;
+            border: 2px solid #86efac;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-size: 1.1em;
+            font-weight: 700;
+            font-family: 'IBM Plex Mono', monospace;
+            width: 150px;
+            text-align: center;
+            color: #166534;
+        }
+        
+        .calculation-step input:focus {
+            outline: none;
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+        }
+        
+        .answer-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 3px solid #bfdbfe;
+        }
+        
+        .answer-section h4 {
+            color: #0c4a6e;
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .answer-input-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .answer-input {
+            background: #eff6ff;
+            border: 3px solid #3b82f6;
+            border-radius: 12px;
+            padding: 15px 25px;
+            font-size: 1.3em;
+            font-weight: 700;
+            font-family: 'IBM Plex Mono', monospace;
+            width: 200px;
+            text-align: center;
+            color: #0c4a6e;
+        }
+        
+        .answer-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        }
+        
+        .unit-label {
+            font-weight: 700;
+            color: #475569;
+            font-size: 1.1em;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .feedback {
+            margin-top: 30px;
+            padding: 30px;
+            border-radius: 16px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .feedback.correct {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border: 3px solid #22c55e;
+        }
+        
+        .feedback.incorrect {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: 3px solid #ef4444;
+        }
+        
+        .feedback-title {
+            font-size: 1.6em;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+        
+        .feedback.correct .feedback-title {
+            color: #166534;
+        }
+        
+        .feedback.incorrect .feedback-title {
+            color: #991b1b;
+        }
+        
+        .feedback-text {
+            font-size: 1.1em;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        
+        .feedback.correct .feedback-text {
+            color: #065f46;
+        }
+        
+        .feedback.incorrect .feedback-text {
+            color: #7f1d1d;
+        }
+        
+        .explanation-box {
+            background: rgba(255,255,255,0.7);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        
+        .explanation-box h5 {
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .explanation-box p {
+            line-height: 1.7;
+        }
+        
+        .completion-icon {
+            font-size: 6em;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .completion-title {
+            color: #0c4a6e;
+            font-size: 3em;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .completion-stats {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 30px 0;
+            border: 3px solid #3b82f6;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+            font-size: 1.3em;
+        }
+        
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        
+        .stat-label {
+            font-weight: 600;
+            color: #475569;
+        }
+        
+        .stat-value {
+            color: #0c4a6e;
+            font-weight: 800;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .reference-section {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 40px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .reference-section h3 {
+            color: #bfdbfe;
+            font-size: 1.6em;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .reference-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .reference-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+        
+        .reference-card h4 {
+            color: #60a5fa;
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        
+        .reference-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .reference-card li {
+            color: #e0f2fe;
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        .reference-card li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #60a5fa;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💧 Fluid Resuscitation Calculator</h1>
+            <p class="subtitle">Interactive Practice for Burn Fluid Management</p>
+        </header>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar" style="width: 0%">Question 0 of 10</div>
+        </div>
+        
+        <!-- Intro Screen -->
+        <div id="introScreen">
+            <div class="intro-screen">
+                <div class="intro-content">
+                    <h2>📋 Fluid Resuscitation Guidelines</h2>
+                    
+                    <div class="key-points">
+                        <h3>Key Principles:</h3>
+                        <ul>
+                            <li>Fluid resuscitation is indicated for burns <strong>>20% TBSA</strong> or any <strong>electrical burn injury</strong></li>
+                            <li>Calculate TBSA using the Lund and Browder method</li>
+                            <li>Inquire about fluids already received (field, transport, ED)</li>
+                            <li>Obtain accurate patient weight in kilograms</li>
+                            <li>Time calculation starts from <strong>time of injury</strong>, NOT hospital arrival</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="formula-box">
+                        <div class="formula-title">Standard Thermal Burns Formula:</div>
+                        <div class="formula">2 mL × Weight (kg) × % TBSA = Total fluid for 24 hours</div>
+                    </div>
+                    
+                    <div class="formula-box">
+                        <div class="formula-title">Electrical Burns Formula:</div>
+                        <div class="formula">4 mL × Weight (kg) × % TBSA = Total fluid for 24 hours</div>
+                    </div>
+                    
+                    <div class="key-points">
+                        <h3>Critical Timing:</h3>
+                        <ul>
+                            <li><strong>First 8 hours:</strong> Administer 50% of total calculated fluid</li>
+                            <li><strong>Remaining 16 hours:</strong> Administer remaining 50% of fluid</li>
+                            <li>Time starts from <strong>moment of burn injury</strong>, not hospital presentation</li>
+                            <li>Monitor urine output (target: 30-50 mL/hr) and titrate accordingly</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 40px;">
+                        <button class="btn-primary" onclick="startPractice()">🚀 Start Practice Questions</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Question Screen -->
+        <div id="questionScreen" class="hidden">
+            <div class="question-screen">
+                <div id="questionContent"></div>
+            </div>
+        </div>
+        
+        <!-- Completion Screen -->
+        <div id="completionScreen" class="hidden">
+            <div class="completion-screen">
+                <div class="completion-icon">🎉</div>
+                <h2 class="completion-title">Practice Complete!</h2>
+                <p style="text-align: center; font-size: 1.2em; color: #64748b; margin-bottom: 30px;">
+                    Excellent work! Here's your performance summary:
+                </p>
+                
+                <div class="completion-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Total Questions:</span>
+                        <span class="stat-value">10</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Correct on First Try:</span>
+                        <span class="stat-value" id="correctCount">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Accuracy Rate:</span>
+                        <span class="stat-value" id="accuracyPercent">0%</span>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 40px;">
+                    <button class="btn-primary" onclick="restartPractice()">🔄 Practice Again</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Reference Section -->
+        <div class="reference-section">
+            <h3>📚 Quick Reference Guide</h3>
+            <div class="reference-grid">
+                <div class="reference-card">
+                    <h4>Urine Output Titration</h4>
+                    <ul>
+                        <li><15 mL/hr: ↑ rate 20% (notify MD)</li>
+                        <li>15-30 mL/hr: ↑ rate 10%</li>
+                        <li>30-50 mL/hr: Continue rate</li>
+                        <li>50-200 mL/hr: ↓ rate 10%</li>
+                        <li>>200 mL/hr: ↓ rate 10% q30min (notify MD)</li>
+                    </ul>
+                </div>
+                
+                <div class="reference-card">
+                    <h4>Signs of Under-Resuscitation</h4>
+                    <ul>
+                        <li>Decreased urine output</li>
+                        <li>Kidney failure from underperfusion</li>
+                        <li>Tissue necrosis</li>
+                        <li>Rising serum lactate</li>
+                    </ul>
+                </div>
+                
+                <div class="reference-card">
+                    <h4>Signs of Over-Resuscitation</h4>
+                    <ul>
+                        <li>Fluid overload</li>
+                        <li>Pulmonary edema</li>
+                        <li>Pericardial effusion</li>
+                        <li>Compartment syndrome</li>
+                        <li>Cerebral edema</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                difficulty: "guided",
+                scenario: "A patient weighing 60 kg sustained thermal burn injuries to 40% of their body.",
+                question: "Based on the consensus formula, how much fluid should this patient receive in the first 24 hours?",
+                patientInfo: {
+                    weight: 60,
+                    tbsa: 40,
+                    burnType: "Thermal",
+                    timeOfInjury: "N/A",
+                    timeOfPresentation: "N/A"
+                },
+                guided: true,
+                guidedSteps: [
+                    { label: "Formula:", text: "2 mL ×" },
+                    { label: "Weight (kg):", inputId: "weight", answer: 60 },
+                    { label: "×", text: "" },
+                    { label: "% TBSA:", inputId: "tbsa", answer: 40 },
+                    { label: "=", text: "" },
+                    { label: "Total fluid (mL):", inputId: "total", answer: 4800 }
+                ],
+                correctAnswer: 4800,
+                explanation: "Using the formula: 2 mL × 60 kg × 40% TBSA = 4,800 mL total fluid for 24 hours. For thermal burns, we use 2 mL as the multiplier."
+            },
+            {
+                id: 2,
+                difficulty: "guided",
+                scenario: "A 75 kg patient sustained an electrical burn with 30% TBSA.",
+                question: "Calculate the total fluid requirement for the first 24 hours.",
+                patientInfo: {
+                    weight: 75,
+                    tbsa: 30,
+                    burnType: "Electrical",
+                    timeOfInjury: "N/A",
+                    timeOfPresentation: "N/A"
+                },
+                guided: true,
+                guidedSteps: [
+                    { label: "Formula:", text: "4 mL ×" },
+                    { label: "Weight (kg):", inputId: "weight", answer: 75 },
+                    { label: "×", text: "" },
+                    { label: "% TBSA:", inputId: "tbsa", answer: 30 },
+                    { label: "=", text: "" },
+                    { label: "Total fluid (mL):", inputId: "total", answer: 9000 }
+                ],
+                correctAnswer: 9000,
+                explanation: "For electrical burns, use 4 mL (not 2 mL): 4 mL × 75 kg × 30% TBSA = 9,000 mL total fluid for 24 hours."
+            },
+            {
+                id: 3,
+                difficulty: "intermediate",
+                scenario: "A 55-year-old female weighing 70 kg was injured in a house fire at 10:00 AM and arrived at the hospital at 11:30 AM. She sustained thermal burns covering 45% TBSA. She received no fluids during transport or in the ED.",
+                question: "How much total fluid should she receive in the first 24 hours, and how much should be administered by 6:00 PM (8 hours post-injury)?",
+                patientInfo: {
+                    weight: 70,
+                    tbsa: 45,
+                    burnType: "Thermal",
+                    timeOfInjury: "10:00 AM",
+                    timeOfPresentation: "11:30 AM"
+                },
+                guided: false,
+                twoPartAnswer: true,
+                correctAnswer: {
+                    total24hr: 6300,
+                    first8hr: 3150
+                },
+                explanation: "Total 24-hour fluid: 2 mL × 70 kg × 45% TBSA = 6,300 mL. The first half (3,150 mL) must be given within 8 hours of injury time (10:00 AM), which means by 6:00 PM. Remember: timing is based on injury time, NOT hospital arrival time."
+            },
+            {
+                id: 4,
+                difficulty: "intermediate",
+                scenario: "A 40-year-old male weighing 80 kg is admitted to the burn unit at 2:00 PM after sustaining a burn injury from hot cooking oil at 1:00 PM. He has a combination of 2nd and 3rd degree burns totaling 50% TBSA. The patient received no fluids in the ambulance or ED.",
+                question: "How much fluid should this patient have received by 9:00 PM?",
+                patientInfo: {
+                    weight: 80,
+                    tbsa: 50,
+                    burnType: "Thermal",
+                    timeOfInjury: "1:00 PM",
+                    timeOfPresentation: "2:00 PM"
+                },
+                guided: false,
+                correctAnswer: 4000,
+                explanation: "Total 24-hour fluid: 2 mL × 80 kg × 50% TBSA = 8,000 mL. Half (4,000 mL) must be given in the first 8 hours from injury (1:00 PM to 9:00 PM). By 9:00 PM, he should have received 4,000 mL, even though he only arrived at the hospital at 2:00 PM."
+            },
+            {
+                id: 5,
+                difficulty: "advanced",
+                scenario: "A 28-year-old electrician weighing 92 kg sustained an electrical burn injury at a construction site at 3:45 PM. He was transported to your facility and arrived at 5:15 PM. Assessment reveals 35% TBSA burns. During transport, paramedics administered 500 mL of normal saline. In the ED, he received an additional 750 mL over 45 minutes before transfer to the burn unit at 6:30 PM.",
+                question: "What is the total 24-hour fluid requirement, how much should have been given by 11:45 PM (8 hours post-injury), and accounting for fluids already received, how much MORE fluid needs to be administered before 11:45 PM?",
+                patientInfo: {
+                    weight: 92,
+                    tbsa: 35,
+                    burnType: "Electrical",
+                    timeOfInjury: "3:45 PM",
+                    timeOfPresentation: "5:15 PM",
+                    fluidsReceived: "500 mL (transport) + 750 mL (ED) = 1,250 mL"
+                },
+                guided: false,
+                threePartAnswer: true,
+                correctAnswer: {
+                    total24hr: 12880,
+                    first8hr: 6440,
+                    remaining: 5190
+                },
+                explanation: "Total 24-hour fluid: 4 mL × 92 kg × 35% TBSA = 12,880 mL (note: 4 mL for electrical burns). First 8 hours (by 11:45 PM): 6,440 mL needed. Already received: 1,250 mL. Still needs: 6,440 - 1,250 = 5,190 mL before 11:45 PM. This is the most complex scenario requiring you to account for electrical burn formula, timing from injury, and fluids already administered."
+            },
+            {
+                id: 6,
+                difficulty: "guided",
+                scenario: "A 68 kg patient was involved in a kitchen fire and sustained thermal burns covering 25% of their body.",
+                question: "Calculate the total fluid requirement for the first 24 hours using the consensus formula.",
+                patientInfo: {
+                    weight: 68,
+                    tbsa: 25,
+                    burnType: "Thermal",
+                    timeOfInjury: "N/A",
+                    timeOfPresentation: "N/A"
+                },
+                guided: true,
+                guidedSteps: [
+                    { label: "Formula:", text: "2 mL ×" },
+                    { label: "Weight (kg):", inputId: "weight", answer: 68 },
+                    { label: "×", text: "" },
+                    { label: "% TBSA:", inputId: "tbsa", answer: 25 },
+                    { label: "=", text: "" },
+                    { label: "Total fluid (mL):", inputId: "total", answer: 3400 }
+                ],
+                correctAnswer: 3400,
+                explanation: "Using the formula: 2 mL × 68 kg × 25% TBSA = 3,400 mL total fluid for 24 hours. Remember to use 2 mL for thermal burns."
+            },
+            {
+                id: 7,
+                difficulty: "guided",
+                scenario: "An 85 kg construction worker sustained an electrical injury while working on power lines. Assessment shows 28% TBSA burns.",
+                question: "What is the total fluid requirement for the first 24 hours?",
+                patientInfo: {
+                    weight: 85,
+                    tbsa: 28,
+                    burnType: "Electrical",
+                    timeOfInjury: "N/A",
+                    timeOfPresentation: "N/A"
+                },
+                guided: true,
+                guidedSteps: [
+                    { label: "Formula:", text: "4 mL ×" },
+                    { label: "Weight (kg):", inputId: "weight", answer: 85 },
+                    { label: "×", text: "" },
+                    { label: "% TBSA:", inputId: "tbsa", answer: 28 },
+                    { label: "=", text: "" },
+                    { label: "Total fluid (mL):", inputId: "total", answer: 9520 }
+                ],
+                correctAnswer: 9520,
+                explanation: "For electrical burns, use 4 mL: 4 mL × 85 kg × 28% TBSA = 9,520 mL total fluid for 24 hours. Electrical burns require double the fluid of thermal burns."
+            },
+            {
+                id: 8,
+                difficulty: "intermediate",
+                scenario: "A 62-year-old male weighing 95 kg sustained flame burns at 7:30 AM when his garage caught fire. He arrived at the burn center at 9:00 AM with 38% TBSA burns. No fluids were administered prior to arrival.",
+                question: "What is the total 24-hour fluid requirement, and how much should be given by 3:30 PM (8 hours post-injury)?",
+                patientInfo: {
+                    weight: 95,
+                    tbsa: 38,
+                    burnType: "Thermal",
+                    timeOfInjury: "7:30 AM",
+                    timeOfPresentation: "9:00 AM"
+                },
+                guided: false,
+                twoPartAnswer: true,
+                correctAnswer: {
+                    total24hr: 7220,
+                    first8hr: 3610
+                },
+                explanation: "Total 24-hour fluid: 2 mL × 95 kg × 38% TBSA = 7,220 mL. First 8 hours (by 3:30 PM): 3,610 mL must be administered. The 8-hour window starts from injury time (7:30 AM), not arrival time (9:00 AM)."
+            },
+            {
+                id: 9,
+                difficulty: "intermediate",
+                scenario: "A 33-year-old female weighing 58 kg sustained burns from a propane explosion at 12:45 PM. She was transported to your facility, arriving at 1:30 PM. She has 42% TBSA thermal burns. Paramedics gave her 300 mL of lactated Ringer's during transport.",
+                question: "By 8:45 PM (8 hours post-injury), how much total fluid should she have received?",
+                patientInfo: {
+                    weight: 58,
+                    tbsa: 42,
+                    burnType: "Thermal",
+                    timeOfInjury: "12:45 PM",
+                    timeOfPresentation: "1:30 PM",
+                    fluidsReceived: "300 mL (transport)"
+                },
+                guided: false,
+                correctAnswer: 2436,
+                explanation: "Total 24-hour fluid: 2 mL × 58 kg × 42% TBSA = 4,872 mL. First 8 hours (by 8:45 PM): 2,436 mL should have been given. Note: The 300 mL already received counts toward this total, but the question asks for the total amount that should have been received, which is 2,436 mL."
+            },
+            {
+                id: 10,
+                difficulty: "advanced",
+                scenario: "A 45-year-old utility worker weighing 78 kg contacted a high-voltage power line at 11:20 AM. He arrived at the hospital at 12:50 PM with 32% TBSA electrical burns. En route, he received 600 mL of normal saline. In the ED, he received an additional 900 mL before being admitted to the burn unit at 2:00 PM. It is now 3:00 PM.",
+                question: "What is the total 24-hour fluid requirement, how much should have been given by 7:20 PM (8 hours post-injury), and how much MORE fluid needs to be given between now (3:00 PM) and 7:20 PM?",
+                patientInfo: {
+                    weight: 78,
+                    tbsa: 32,
+                    burnType: "Electrical",
+                    timeOfInjury: "11:20 AM",
+                    timeOfPresentation: "12:50 PM",
+                    fluidsReceived: "600 mL (transport) + 900 mL (ED) = 1,500 mL"
+                },
+                guided: false,
+                threePartAnswer: true,
+                correctAnswer: {
+                    total24hr: 9984,
+                    first8hr: 4992,
+                    remaining: 3492
+                },
+                explanation: "Total 24-hour fluid: 4 mL × 78 kg × 32% TBSA = 9,984 mL (electrical burn = 4 mL). First 8 hours (by 7:20 PM): 4,992 mL needed. Already received: 1,500 mL. Still needs before 7:20 PM: 4,992 - 1,500 = 3,492 mL. This must be given in the next 4 hours and 20 minutes (from 3:00 PM to 7:20 PM)."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let correctCount = 0;
+        let hasSubmitted = false;
+
+        function startPractice() {
+            document.getElementById('introScreen').classList.add('hidden');
+            document.getElementById('questionScreen').classList.remove('hidden');
+            loadQuestion(0);
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            hasSubmitted = false;
+            
+            const q = questions[index];
+            const progress = ((index + 1) / questions.length) * 100;
+            
+            document.getElementById('progressBar').textContent = `Question ${index + 1} of ${questions.length}`;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            let content = `
+                <div class="difficulty-badge ${q.difficulty}">${q.difficulty}</div>
+                <h3 class="scenario-title">Case ${q.id}</h3>
+                <p class="scenario-text">${q.scenario}</p>
+                
+                <div class="patient-info">
+                    <div class="patient-info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Weight:</span>
+                            <span class="info-value">${q.patientInfo.weight} kg</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">TBSA:</span>
+                            <span class="info-value">${q.patientInfo.tbsa}%</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Burn Type:</span>
+                            <span class="info-value">${q.patientInfo.burnType}</span>
+                        </div>
+                        ${q.patientInfo.timeOfInjury !== "N/A" ? `
+                        <div class="info-item">
+                            <span class="info-label">Time of Injury:</span>
+                            <span class="info-value">${q.patientInfo.timeOfInjury}</span>
+                        </div>
+                        ` : ''}
+                        ${q.patientInfo.timeOfPresentation !== "N/A" ? `
+                        <div class="info-item">
+                            <span class="info-label">Presentation:</span>
+                            <span class="info-value">${q.patientInfo.timeOfPresentation}</span>
+                        </div>
+                        ` : ''}
+                        ${q.patientInfo.fluidsReceived ? `
+                        <div class="info-item" style="grid-column: 1 / -1;">
+                            <span class="info-label">Fluids Received:</span>
+                            <span class="info-value">${q.patientInfo.fluidsReceived}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <div class="question-card">
+                    <strong style="font-size: 1.2em; color: #0c4a6e;">Question:</strong><br>
+                    <span style="font-size: 1.15em; color: #1e293b;">${q.question}</span>
+                </div>
+            `;
+            
+            if (q.guided) {
+                content += `
+                    <div class="guided-calculation">
+                        <h4>💡 Step-by-Step Calculation Guide</h4>
+                        <div class="calculation-step">
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 1.2em;">
+                                ${q.guidedSteps.map(step => {
+                                    if (step.inputId) {
+                                        return `
+                                            <span style="font-weight: 600; color: #166534;">${step.label}</span>
+                                            <input type="number" id="${step.inputId}" class="calculation-step" 
+                                                   placeholder="?" data-answer="${step.answer}" 
+                                                   style="width: 120px;">
+                                        `;
+                                    } else {
+                                        return `<span style="font-weight: 600; color: #166534;">${step.label} ${step.text}</span>`;
+                                    }
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (q.twoPartAnswer) {
+                content += `
+                    <div class="answer-section">
+                        <h4>Your Answer:</h4>
+                        <div style="margin-bottom: 20px;">
+                            <p style="margin-bottom: 10px; font-weight: 600;">Total fluid for 24 hours:</p>
+                            <div class="answer-input-group">
+                                <input type="number" id="answer24hr" class="answer-input" placeholder="0">
+                                <span class="unit-label">mL</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p style="margin-bottom: 10px; font-weight: 600;">Fluid by 8 hours post-injury:</p>
+                            <div class="answer-input-group">
+                                <input type="number" id="answer8hr" class="answer-input" placeholder="0">
+                                <span class="unit-label">mL</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (q.threePartAnswer) {
+                content += `
+                    <div class="answer-section">
+                        <h4>Your Answer:</h4>
+                        <div style="margin-bottom: 20px;">
+                            <p style="margin-bottom: 10px; font-weight: 600;">1. Total fluid for 24 hours:</p>
+                            <div class="answer-input-group">
+                                <input type="number" id="answer24hr" class="answer-input" placeholder="0">
+                                <span class="unit-label">mL</span>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <p style="margin-bottom: 10px; font-weight: 600;">2. Total fluid needed by 8 hours post-injury:</p>
+                            <div class="answer-input-group">
+                                <input type="number" id="answer8hr" class="answer-input" placeholder="0">
+                                <span class="unit-label">mL</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p style="margin-bottom: 10px; font-weight: 600;">3. Additional fluid still needed before 8-hour mark:</p>
+                            <div class="answer-input-group">
+                                <input type="number" id="answerRemaining" class="answer-input" placeholder="0">
+                                <span class="unit-label">mL</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                content += `
+                    <div class="answer-section">
+                        <h4>Your Answer:</h4>
+                        <div class="answer-input-group">
+                            <input type="number" id="answerInput" class="answer-input" placeholder="0">
+                            <span class="unit-label">mL</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            content += `
+                <div class="button-group">
+                    <button class="btn-primary" onclick="submitAnswer()">✓ Submit Answer</button>
+                    <button class="btn-secondary" onclick="resetQuestion()">🔄 Clear</button>
+                </div>
+                <div id="feedbackArea"></div>
+            `;
+            
+            document.getElementById('questionContent').innerHTML = content;
+        }
+
+        function submitAnswer() {
+            if (hasSubmitted) return;
+            
+            const q = questions[currentQuestion];
+            let isCorrect = false;
+            let userAnswer;
+            
+            if (q.guided) {
+                const inputs = document.querySelectorAll('.calculation-step[data-answer]');
+                let allCorrect = true;
+                
+                inputs.forEach(input => {
+                    const correct = parseInt(input.dataset.answer);
+                    const value = parseInt(input.value);
+                    if (value !== correct) {
+                        allCorrect = false;
+                        input.style.borderColor = '#ef4444';
+                    } else {
+                        input.style.borderColor = '#22c55e';
+                    }
+                });
+                
+                isCorrect = allCorrect;
+                userAnswer = document.getElementById('total').value;
+            } else if (q.twoPartAnswer) {
+                const answer24 = parseInt(document.getElementById('answer24hr').value);
+                const answer8 = parseInt(document.getElementById('answer8hr').value);
+                
+                isCorrect = (answer24 === q.correctAnswer.total24hr && answer8 === q.correctAnswer.first8hr);
+                userAnswer = `24hr: ${answer24} mL, 8hr: ${answer8} mL`;
+            } else if (q.threePartAnswer) {
+                const answer24 = parseInt(document.getElementById('answer24hr').value);
+                const answer8 = parseInt(document.getElementById('answer8hr').value);
+                const answerRem = parseInt(document.getElementById('answerRemaining').value);
+                
+                isCorrect = (answer24 === q.correctAnswer.total24hr && 
+                            answer8 === q.correctAnswer.first8hr && 
+                            answerRem === q.correctAnswer.remaining);
+                userAnswer = `24hr: ${answer24} mL, 8hr: ${answer8} mL, remaining: ${answerRem} mL`;
+            } else {
+                userAnswer = parseInt(document.getElementById('answerInput').value);
+                isCorrect = userAnswer === q.correctAnswer;
+            }
+            
+            hasSubmitted = true;
+            
+            if (isCorrect) {
+                correctCount++;
+            }
+            
+            showFeedback(isCorrect, q);
+        }
+
+        function showFeedback(isCorrect, q) {
+            const feedbackArea = document.getElementById('feedbackArea');
+            
+            let correctAnswerText = '';
+            if (q.twoPartAnswer) {
+                correctAnswerText = `Total 24 hours: ${q.correctAnswer.total24hr.toLocaleString()} mL<br>
+                                    First 8 hours: ${q.correctAnswer.first8hr.toLocaleString()} mL`;
+            } else if (q.threePartAnswer) {
+                correctAnswerText = `Total 24 hours: ${q.correctAnswer.total24hr.toLocaleString()} mL<br>
+                                    First 8 hours: ${q.correctAnswer.first8hr.toLocaleString()} mL<br>
+                                    Additional fluid needed: ${q.correctAnswer.remaining.toLocaleString()} mL`;
+            } else {
+                correctAnswerText = `${q.correctAnswer.toLocaleString()} mL`;
+            }
+            
+            feedbackArea.innerHTML = `
+                <div class="feedback ${isCorrect ? 'correct' : 'incorrect'}">
+                    <div class="feedback-title">${isCorrect ? '✓ Correct!' : '✗ Incorrect'}</div>
+                    <div class="feedback-text">
+                        ${isCorrect 
+                            ? 'Excellent work! You correctly calculated the fluid requirements.' 
+                            : `The correct answer is:<br><strong>${correctAnswerText}</strong>`
+                        }
+                    </div>
+                    <div class="explanation-box">
+                        <h5>📖 Explanation:</h5>
+                        <p>${q.explanation}</p>
+                    </div>
+                    <div class="button-group" style="margin-top: 25px;">
+                        ${currentQuestion < questions.length - 1 
+                            ? '<button class="btn-primary" onclick="nextQuestion()">→ Next Question</button>'
+                            : '<button class="btn-primary" onclick="showCompletion()">🎉 View Results</button>'
+                        }
+                    </div>
+                </div>
+            `;
+        }
+
+        function resetQuestion() {
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                input.value = '';
+                input.style.borderColor = '';
+            });
+            document.getElementById('feedbackArea').innerHTML = '';
+            hasSubmitted = false;
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                loadQuestion(currentQuestion + 1);
+            }
+        }
+
+        function showCompletion() {
+            document.getElementById('questionScreen').classList.add('hidden');
+            document.getElementById('completionScreen').classList.remove('hidden');
+            
+            const accuracy = (correctCount / questions.length) * 100;
+            document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('accuracyPercent').textContent = accuracy.toFixed(0) + '%';
+        }
+
+        function restartPractice() {
+            currentQuestion = 0;
+            correctCount = 0;
+            hasSubmitted = false;
+            
+            document.getElementById('completionScreen').classList.add('hidden');
+            document.getElementById('introScreen').classList.remove('hidden');
+            
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('progressBar').textContent = 'Question 0 of 10';
+        }
+    </script>
+</body>
+</html>
